@@ -1,0 +1,493 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SmartPark AI | Intelligent Parking Agent</title>
+<style>
+:root{
+ --bg:#050d1c;--panel:#0b1930;--panel2:#10233d;
+ --border:#173d60;--blue:#19bfff;--green:#00f0a0;
+ --red:#ff5476;--yellow:#ffc857;--text:#eaf5ff;--muted:#8ba7c4;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);
+ font-family:Inter,Segoe UI,Arial,sans-serif;font-size:14px}
+button,input,select{font:inherit}
+button{cursor:pointer;transition:.2s}
+button:hover{filter:brightness(1.15);transform:translateY(-1px)}
+header{height:76px;display:flex;align-items:center;justify-content:space-between;
+ padding:14px 24px;background:#071329;border-bottom:1px solid var(--border);
+ position:sticky;top:0;z-index:5}
+.brand{display:flex;align-items:center;gap:12px}
+.logo{width:43px;height:43px;border:1px solid var(--blue);border-radius:12px;
+ display:grid;place-items:center;color:var(--blue);font-size:25px;
+ font-weight:900;box-shadow:0 0 18px #00bfff30}
+.brand h1{font-size:23px;color:var(--blue);margin:0}
+.brand p{margin:4px 0 0;color:var(--muted);font-size:12px}
+.header-right{color:var(--muted);text-align:right;font-size:12px}
+.layout{display:grid;grid-template-columns:190px minmax(0,1fr);min-height:calc(100vh - 76px)}
+aside{padding:24px 12px;border-right:1px solid var(--border);background:#071329}
+.nav{width:100%;padding:13px 12px;border:1px solid transparent;
+ background:transparent;color:#a9c4df;text-align:left;border-radius:9px;
+ margin-bottom:7px}
+.nav.active{background:#0b2c50;border-color:#087cbd;color:var(--blue)}
+.eco{margin-top:40px;color:var(--green);font-size:12px;line-height:1.7}
+main{padding:22px;min-width:0;max-width:1600px;width:100%;margin:auto}
+.page-title{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:18px}
+.page-title h2{margin:0;font-size:22px}
+.page-title p{color:var(--muted);margin:6px 0 0;font-size:12px}
+.pill{padding:7px 10px;border:1px solid #116a53;color:var(--green);
+ border-radius:20px;font-size:11px;white-space:nowrap}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.panel,.stat{background:linear-gradient(140deg,#0c1d35,#071427);
+ border:1px solid var(--border);border-radius:12px}
+.stat{padding:17px}
+.stat-label{color:var(--muted);font-size:12px}
+.stat-value{font-size:29px;font-weight:750;margin:9px 0 5px}
+.stat-note{color:var(--green);font-size:11px}
+.blue{color:var(--blue)}.green{color:var(--green)}
+.red{color:var(--red)}.yellow{color:var(--yellow)}
+.content-grid{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(280px,.9fr);
+ gap:15px;margin-top:16px}
+.panel{padding:17px;min-width:0}
+.panel h3{margin:0 0 15px;font-size:15px}
+.panel-heading{display:flex;justify-content:space-between;align-items:center;gap:8px;
+ flex-wrap:wrap}
+.legend{display:flex;gap:12px;color:var(--muted);font-size:11px}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:4px}
+.parking-map{padding:14px;background:#071426;border:1px solid #14334e;border-radius:10px}
+.road{border:1px dashed #1c6284;padding:9px;text-align:center;color:var(--blue);
+ font-size:11px;margin-bottom:12px;border-radius:5px}
+.slots{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}
+.slot{border:1px solid #007e66;background:#062d2a;color:var(--green);
+ border-radius:8px;min-height:105px;display:flex;flex-direction:column;
+ align-items:center;justify-content:center;gap:6px;padding:8px 3px}
+.slot .car{font-size:23px}.slot strong{font-size:15px}
+.slot small{font-size:10px}
+.slot.occupied{border-color:#a62d4d;background:#321525;color:var(--red)}
+.slot.reserved{border-color:#96711e;background:#302713;color:var(--yellow)}
+.slot.selected{outline:2px solid var(--blue);outline-offset:2px}
+.slot:disabled{cursor:not-allowed;opacity:.88}
+.map-foot{display:flex;justify-content:space-between;color:var(--muted);
+ font-size:10px;margin-top:12px}
+.agent{border-color:#087b87;box-shadow:0 0 20px #00d6ff0a}
+.agent-title{display:flex;gap:10px;align-items:center}
+.agent-icon{width:42px;height:42px;border:1px solid var(--blue);border-radius:10px;
+ display:grid;place-items:center;color:var(--blue);font-size:23px}
+.agent-title h3{margin:0 0 5px}
+.agent-title p{margin:0;color:var(--muted);font-size:11px}
+.field{margin-top:16px}
+label{display:block;color:#b9cee2;margin-bottom:7px;font-size:12px}
+select,input{width:100%;padding:11px;background:#071629;border:1px solid #235176;
+ color:var(--text);border-radius:7px;outline:none}
+select:focus,input:focus{border-color:var(--blue)}
+button.primary{width:100%;border:0;border-radius:8px;padding:12px;
+ background:linear-gradient(90deg,#00d6a0,#18bfff);color:#031322;
+ font-weight:800;margin-top:15px}
+button.secondary,button.ghost{padding:10px;border-radius:7px;
+ border:1px solid var(--border);background:#10243c;color:var(--text)}
+.recommendation{margin-top:15px;border:1px solid #087d68;background:#052622;
+ border-radius:10px;padding:14px}
+.rec-top{display:flex;align-items:center;gap:12px}
+.rec-number{width:50px;height:50px;display:grid;place-items:center;
+ background:#064d3c;color:var(--green);border:1px solid #0c8c70;
+ border-radius:10px;font-size:27px;font-weight:800}
+.rec-reason{font-size:12px;color:#c3d9e9;line-height:1.8;margin-top:12px}
+.rec-reason li{padding-left:2px}
+.notice{margin-top:12px;padding:10px;border-radius:7px;
+ background:#0b1d33;color:#b7d7f0;font-size:12px;line-height:1.6}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+.actions button{font-size:12px}
+.lower-grid{display:grid;grid-template-columns:1fr 1.2fr;gap:15px;margin-top:16px}
+.metric{margin:13px 0}
+.metric-head{display:flex;justify-content:space-between;gap:8px;font-size:12px}
+.bar{height:7px;background:#1b2c43;border-radius:9px;overflow:hidden;margin-top:7px}
+.bar span{display:block;height:100%;background:linear-gradient(90deg,#08a9f5,#00f0a0)}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th,td{text-align:left;padding:11px 7px;border-bottom:1px solid #17324b}
+th{color:var(--muted);font-weight:500}
+td{color:#d3e5f5}
+.history{margin-top:16px}
+.history-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;
+ padding:12px 0;border-bottom:1px solid #17324b;font-size:12px}
+.history-row span:last-child{text-align:right}
+.tag{font-size:10px;color:var(--green)}
+.hidden{display:none!important}
+footer{text-align:center;color:#6385a4;font-size:11px;padding:25px 0 8px}
+#toast{position:fixed;bottom:20px;right:20px;z-index:10;background:#0c2941;
+ border:1px solid var(--blue);padding:14px 18px;border-radius:9px;
+ box-shadow:0 8px 30px #0008;max-width:340px;display:none;line-height:1.5}
+@media(max-width:1000px){
+ .layout{grid-template-columns:1fr}
+ aside{display:flex;gap:6px;overflow-x:auto;padding:10px}
+ .nav{width:auto;white-space:nowrap;margin:0}
+ .eco{display:none}
+ .content-grid{grid-template-columns:1fr}
+ .lower-grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+ header{padding:12px;height:68px}.brand h1{font-size:18px}
+ .header-right{display:none}main{padding:12px}
+ .stats{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .stat{padding:12px}.stat-value{font-size:24px}
+ .slots{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .slot{min-height:90px}.actions{grid-template-columns:1fr}
+ .page-title h2{font-size:18px}
+}
+</style>
+</head>
+<body>
+<header>
+ <div class="brand">
+  <div class="logo">P</div>
+  <div><h1>SmartPark AI</h1><p>Intelligent Parking Agent</p></div>
+ </div>
+ <div class="header-right">SMARTER PARKING &nbsp; • &nbsp; LESS SEARCH<br>
+  <span id="clock"></span></div>
+</header>
+
+<div class="layout">
+<aside>
+ <button class="nav active" data-page="dashboard">▦ &nbsp; Dashboard</button>
+ <button class="nav" data-page="booking">＋ &nbsp; Book a Slot</button>
+ <button class="nav" data-page="reservations">▤ &nbsp; Reservations</button>
+ <button class="nav" data-page="analytics">▥ &nbsp; Analytics</button>
+ <button class="nav" data-page="agent">✳ &nbsp; AI Agent</button>
+ <div class="eco">♧ ECO FRIENDLY<br><span style="color:var(--muted)">Less traffic, less searching</span></div>
+</aside>
+
+<main>
+<div class="page-title">
+ <div><h2 id="pageHeading">Parking Overview</h2>
+ <p id="pageSub">Monitor the parking lot and find your ideal space.</p></div>
+ <span class="pill">● DEMO SYSTEM ONLINE</span>
+</div>
+
+<div id="dashboardPage">
+ <section class="stats">
+  <div class="stat"><div class="stat-label">Total Slots</div><div class="stat-value" id="total">12</div><div class="stat-note">Parking capacity</div></div>
+  <div class="stat"><div class="stat-label">Available</div><div class="stat-value green" id="free">7</div><div class="stat-note">Ready for booking</div></div>
+  <div class="stat"><div class="stat-label">Occupied / Reserved</div><div class="stat-value red" id="busy">5</div><div class="stat-note">Unavailable spaces</div></div>
+  <div class="stat"><div class="stat-label">Occupancy</div><div class="stat-value blue" id="occupancy">41.7%</div><div class="stat-note">Current lot utilization</div></div>
+ </section>
+
+ <div class="content-grid">
+ <section class="panel">
+  <div class="panel-heading"><h3>⌘ &nbsp; Parking Lot Map</h3>
+   <div class="legend"><span><i class="dot" style="background:var(--green)"></i>Free</span>
+   <span><i class="dot" style="background:var(--red)"></i>Occupied</span>
+   <span><i class="dot" style="background:var(--yellow)"></i>Reserved</span></div>
+  </div>
+  <div class="parking-map">
+   <div class="road">↑ ENTRANCE &nbsp; • &nbsp; MAIN DRIVEWAY &nbsp; →</div>
+   <div class="slots" id="slotMap"></div>
+   <div class="road" style="margin:12px 0 0">← EXIT &nbsp; • &nbsp; DRIVEWAY</div>
+   <div class="map-foot"><span>Zone A · 12 spaces</span><span>Click a free slot to select it</span></div>
+  </div>
+  <h3 style="margin-top:19px">Quick Actions</h3>
+  <div class="actions">
+   <button class="secondary" onclick="go('booking')">＋ Book Slot</button>
+   <button class="secondary" onclick="releaseSelected()">↻ Release Slot</button>
+   <button class="secondary" onclick="go('reservations')">▤ View Bookings</button>
+  </div>
+ </section>
+
+ <section class="panel agent">
+  <div class="agent-title"><div class="agent-icon">◉</div>
+   <div><h3>AI Parking Agent</h3><p>Explainable slot recommendation</p></div>
+  </div>
+  <div class="field"><label for="vehicle">Vehicle Type</label>
+   <select id="vehicle"><option value="Car">Car</option><option value="Bike">Bike</option><option value="SUV">SUV</option><option value="EV">Electric Vehicle (EV)</option><option value="Accessible">Accessible parking required</option></select>
+  </div>
+  <div class="field"><label for="preference">Optimization Goal</label>
+   <select id="preference"><option value="nearest">Nearest to entrance</option><option value="balanced">Balanced distance and availability</option><option value="farthest">Farthest from entrance</option></select>
+  </div>
+  <button class="primary" onclick="recommend()">✦ Find Best Slot</button>
+  <div id="recommendation" class="recommendation">
+   <div class="rec-top"><div class="rec-number">?</div><div><strong>Awaiting decision</strong><p style="color:var(--muted);margin:6px 0 0;font-size:11px">Choose your preferences above.</p></div></div>
+  </div>
+  <div class="notice">Agent workflow: Observe → Filter → Evaluate → Recommend. All slot data is simulated for this demo.</div>
+ </section>
+ </div>
+
+ <div class="lower-grid">
+ <section class="panel"><h3>▥ &nbsp; Parking Analytics</h3>
+  <div class="metric"><div class="metric-head"><span>Occupancy rate</span><strong id="occLabel">41.7%</strong></div><div class="bar"><span id="occBar" style="width:41.7%"></span></div></div>
+  <div class="metric"><div class="metric-head"><span>Available capacity</span><strong id="freeLabel">58.3%</strong></div><div class="bar"><span id="freeBar" style="width:58.3%"></span></div></div>
+  <div class="metric"><div class="metric-head"><span>Successful bookings this session</span><strong id="bookCount">0</strong></div></div>
+  <p style="font-size:11px;color:var(--muted);line-height:1.7">Figures update when slots are booked and released. Search-time comparisons below are illustrative simulation results, not measured real-world performance.</p>
+ </section>
+ <section class="panel"><h3>⇄ &nbsp; Agent vs Basic Strategy</h3>
+  <table><thead><tr><th>Metric</th><th>AI Agent</th><th>Basic method</th></tr></thead>
+  <tbody><tr><td>Slot selection</td><td class="green">Multi-criteria</td><td>First free</td></tr>
+  <tr><td>Vehicle suitability</td><td class="green">Considered</td><td>Not considered</td></tr>
+  <tr><td>Decision explanation</td><td class="green">Provided</td><td>None</td></tr>
+  <tr><td>Search time</td><td>Not measured</td><td>Not measured</td></tr></tbody></table>
+  <p style="font-size:11px;color:var(--muted)">Fair comparison: real performance needs repeatable tests using the same parking scenarios.</p>
+ </section>
+ </div>
+</div>
+
+<div id="bookingPage" class="hidden">
+ <section class="panel">
+  <h3>＋ &nbsp; Create Parking Booking</h3>
+  <div class="field"><label for="driver">Driver / Booking Name</label><input id="driver" placeholder="Enter a name"></div>
+  <div class="field"><label for="bookVehicle">Vehicle Type</label><select id="bookVehicle"><option>Car</option><option>Bike</option><option>SUV</option><option>EV</option><option>Accessible</option></select></div>
+  <div class="field"><label for="slotChoice">Parking Slot</label><select id="slotChoice"></select></div>
+  <div class="actions" style="margin-top:15px"><button class="primary" style="margin:0" onclick="bookSelected()">Confirm Booking</button><button class="ghost" onclick="recommendForBooking()">Find a Suitable Slot</button></div>
+  <div id="bookingMessage" class="notice">Select a free slot to make a reservation.</div>
+ </section>
+</div>
+
+<div id="reservationsPage" class="hidden">
+ <section class="panel"><h3>▤ &nbsp; Reservation History</h3>
+ <div id="history"></div></section>
+</div>
+
+<div id="analyticsPage" class="hidden">
+ <section class="panel"><h3>▥ &nbsp; Session Analytics</h3>
+ <div class="stats" style="grid-template-columns:repeat(2,minmax(0,1fr))">
+  <div class="stat"><div class="stat-label">Total booking actions</div><div class="stat-value blue" id="aBookings">0</div></div>
+  <div class="stat"><div class="stat-label">Successful recommendations</div><div class="stat-value green" id="aRecommendations">0</div></div>
+  <div class="stat"><div class="stat-label">Currently occupied/reserved</div><div class="stat-value yellow" id="aBusy">5</div></div>
+  <div class="stat"><div class="stat-label">Currently free</div><div class="stat-value green" id="aFree">7</div></div>
+ </div>
+ <div class="notice">These metrics describe actions performed in this browser session. They do not represent historical real-world parking data.</div>
+ </section>
+</div>
+
+<div id="agentPage" class="hidden">
+ <section class="panel"><h3>✳ &nbsp; Agent Decision Centre</h3>
+ <p style="color:var(--muted);line-height:1.8">This prototype implements a rule-based intelligent agent. It observes the simulated lot, filters unavailable or unsuitable spaces, scores the remaining candidates, and recommends the highest-ranked slot.</p>
+ <h3>Decision process</h3>
+ <div id="decisionLog" class="notice">Run a recommendation from the dashboard to inspect the agent's reasoning.</div>
+ <h3 style="margin-top:22px">Current agent configuration</h3>
+ <table><tbody>
+ <tr><td>Agent type</td><td>Rule-based, goal-directed selection</td></tr>
+ <tr><td>Environment</td><td>Simulated parking lot</td></tr>
+ <tr><td>Inputs</td><td>Availability, distance, vehicle suitability</td></tr>
+ <tr><td>Action</td><td>Recommend a suitable free slot</td></tr>
+ <tr><td>Learning model</td><td>Not included in this version</td></tr>
+ </tbody></table>
+ </section>
+</div>
+<footer>SmartPark AI · Intelligent Decisions. Better Parking.</footer>
+</main>
+</div>
+<div id="toast" role="status"></div>
+
+<script>
+const initialSlots=[
+ {id:1,distance:90,types:["Car","Bike","SUV"],status:"occupied"},
+ {id:2,distance:50,types:["Car","Bike","SUV"],status:"free"},
+ {id:3,distance:70,types:["Car","Bike","SUV"],status:"free"},
+ {id:4,distance:110,types:["Car","Bike","SUV","EV"],status:"free"},
+ {id:5,distance:130,types:["Car","SUV","EV"],status:"reserved"},
+ {id:6,distance:80,types:["Car","Bike","SUV"],status:"occupied"},
+ {id:7,distance:160,types:["Car","Bike","SUV","EV"],status:"free"},
+ {id:8,distance:100,types:["Car","Bike","SUV"],status:"occupied"},
+ {id:9,distance:120,types:["Car","Bike","SUV","EV"],status:"free"},
+ {id:10,distance:140,types:["Car","Bike","SUV"],status:"free"},
+ {id:11,distance:180,types:["Car","Bike","SUV","EV"],status:"free"},
+ {id:12,distance:150,types:["Car","Bike","SUV"],status:"occupied"}
+];
+let slots=initialSlots.map(s=>({...s}));
+let bookings=[];
+let selected=2;
+let bookingCount=0;
+let recommendationCount=0;
+let lastRecommendation=null;
+let toastTimer;
+
+function toast(msg){
+ const t=document.getElementById("toast");
+ t.textContent=msg;t.style.display="block";
+ clearTimeout(toastTimer);
+ toastTimer=setTimeout(()=>t.style.display="none",2800);
+}
+function byId(id){return document.getElementById(id)}
+function getSlot(id){return slots.find(s=>s.id===Number(id))}
+function statusName(s){return s.status[0].toUpperCase()+s.status.slice(1)}
+
+function render(){
+ const free=slots.filter(s=>s.status==="free").length;
+ const busy=slots.length-free;
+ const pct=(busy/slots.length*100).toFixed(1);
+ byId("total").textContent=slots.length;
+ byId("free").textContent=free;
+ byId("busy").textContent=busy;
+ byId("occupancy").textContent=pct+"%";
+ byId("occLabel").textContent=pct+"%";
+ byId("occBar").style.width=pct+"%";
+ byId("freeLabel").textContent=(100-Number(pct)).toFixed(1)+"%";
+ byId("freeBar").style.width=(100-Number(pct))+"%";
+ byId("bookCount").textContent=bookingCount;
+ byId("aBookings").textContent=bookingCount;
+ byId("aRecommendations").textContent=recommendationCount;
+ byId("aBusy").textContent=busy;
+ byId("aFree").textContent=free;
+
+ byId("slotMap").innerHTML=slots.map(s=>{
+ const isSelected=s.id===selected;
+ const icon=s.status==="free"?"🅿":s.status==="occupied"?"🚗":"🔒";
+ return `<button class="slot ${s.status} ${isSelected?"selected":""}"
+ ${s.status!=="free"?'disabled':''} onclick="selectSlot(${s.id})"
+ title="Slot ${s.id}: ${statusName(s)}; ${s.distance}m from entrance">
+ <span class="car">${icon}</span><strong>${String(s.id).padStart(2,"0")}</strong>
+ <small>${statusName(s)}</small></button>`;
+ }).join("");
+
+ const choice=byId("slotChoice");
+ const previous=choice.value;
+ choice.innerHTML=slots.filter(s=>s.status==="free")
+ .map(s=>`<option value="${s.id}">Slot ${s.id} · ${s.distance} m</option>`).join("");
+ if([...choice.options].some(o=>o.value===previous))choice.value=previous;
+ else if([...choice.options].some(o=>Number(o.value)===selected))choice.value=selected;
+ renderHistory();
+}
+function selectSlot(id){
+ selected=id;
+ byId("slotChoice").value=String(id);
+ render();
+}
+function recommend(){
+ const vehicle=byId("vehicle").value;
+ const pref=byId("preference").value;
+ const available=slots.filter(s=>s.status==="free");
+ let candidates=available.filter(s=>{
+  if(vehicle==="EV")return s.types.includes("EV");
+  if(vehicle==="Accessible")return s.id===1||s.id===2;
+  return s.types.includes(vehicle);
+ });
+ if(!candidates.length){
+  lastRecommendation=null;
+  byId("recommendation").innerHTML="<strong class='red'>No suitable slot available</strong><p>Try another vehicle type or release a slot.</p>";
+  byId("decisionLog").textContent="No suitable available slot was found for the current request.";
+  toast("No suitable slot available.");
+  return;
+ }
+ candidates.forEach(s=>{
+  s.score=pref==="nearest"?s.distance:
+   pref==="farthest"?-s.distance:
+   s.distance+(slots.filter(x=>x.status==="free").length>4?0:20);
+ });
+ candidates.sort((a,b)=>a.score-b.score||a.id-b.id);
+ const best=candidates[0];
+ selected=best.id;
+ lastRecommendation={id:best.id,vehicle,pref,distance:best.distance};
+ recommendationCount++;
+ render();
+ const goal=pref==="nearest"?"shortest distance to the entrance":
+ pref==="farthest"?"farthest available space":"balanced selection using the configured distance rule";
+ const suitability=vehicle==="Accessible"?"matches the demo's accessible-slot rule":`supports ${vehicle} parking`;
+ byId("recommendation").innerHTML=`
+ <div class="rec-top"><div class="rec-number">${best.id}</div>
+ <div><strong class="green">Recommended Slot ${best.id}</strong>
+ <p style="color:var(--muted);margin:6px 0 0;font-size:11px">${best.distance} m from entrance</p></div></div>
+ <div class="rec-reason"><b>Why this slot?</b><ul>
+ <li>Slot is currently available.</li><li>It ${suitability}.</li>
+ <li>Selected goal: ${goal}.</li>
+ <li>${candidates.length} suitable free slot(s) evaluated.</li>
+ </ul></div><button class="primary" onclick="bookRecommendation()">Book Slot ${best.id}</button>`;
+ byId("decisionLog").innerHTML=`<b>Observation:</b> ${available.length} slot(s) are free.<br>
+ <b>Vehicle request:</b> ${vehicle}.<br>
+ <b>Filtering:</b> ${candidates.length} slot(s) passed the suitability rules.<br>
+ <b>Evaluation:</b> Candidates ranked by ${pref==="nearest"?"ascending":pref==="farthest"?"descending":"balanced"} distance.<br>
+ <b>Action:</b> Recommend Slot ${best.id} at ${best.distance} metres.<br>
+ <b>Explanation:</b> The slot is free and is the highest-ranked suitable candidate.`;
+ toast("Agent recommends Slot "+best.id);
+}
+function bookRecommendation(){
+ if(!lastRecommendation){toast("Find a slot first.");return}
+ const s=getSlot(lastRecommendation.id);
+ if(!s||s.status!=="free"){toast("That slot is no longer available. Recommend again.");return}
+ bookSlot(s.id,lastRecommendation.vehicle,"AI recommendation");
+}
+function bookSelected(){
+ const s=getSlot(byId("slotChoice").value);
+ if(!s){toast("No free slot to book.");return}
+ const name=byId("driver").value.trim();
+ if(!name){byId("bookingMessage").textContent="Please enter a driver or booking name.";byId("driver").focus();return}
+ const vehicle=byId("bookVehicle").value;
+ if(vehicle==="EV"&&!s.types.includes("EV")){
+  byId("bookingMessage").textContent="Choose a slot marked as suitable for an EV, or use Find a Suitable Slot.";
+  return;
+ }
+ if(vehicle==="Accessible"&&![1,2].includes(s.id)){
+  byId("bookingMessage").textContent="This demo reserves accessible parking selection for Slots 1 or 2.";
+  return;
+ }
+ bookSlot(s.id,vehicle,"Manual booking",name);
+ byId("bookingMessage").textContent=`Booking confirmed for ${name}, Slot ${s.id}.`;
+}
+function bookSlot(id,vehicle,source,name="Demo Driver"){
+ const s=getSlot(id);
+ if(!s||s.status!=="free"){toast("Booking rejected: slot is not available.");return}
+ s.status="reserved";
+ const ref="SP"+String(Date.now()).slice(-6);
+ bookings.unshift({ref,id,vehicle,name,source,time:new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}),active:true});
+ bookingCount++;
+ selected=id;
+ render();
+ toast("Booking confirmed: Slot "+id+" ("+ref+")");
+}
+function releaseSelected(){
+ const s=getSlot(selected);
+ if(!s||s.status==="free"){toast("Select an occupied or reserved slot to release.");return}
+ s.status="free";
+ const b=bookings.find(b=>b.id===s.id&&b.active);
+ if(b)b.active=false;
+ render();
+ toast("Slot "+s.id+" released successfully.");
+}
+function recommendForBooking(){
+ byId("vehicle").value=byId("bookVehicle").value;
+ go("dashboard");
+ recommend();
+ if(lastRecommendation) {
+  byId("slotChoice").value=String(lastRecommendation.id);
+  go("booking");
+  byId("bookingMessage").textContent="Suitable slot found. Enter a name and confirm booking.";
+ }
+}
+function renderHistory(){
+ const active=bookings.length?bookings:[];
+ byId("history").innerHTML=active.length?active.map(b=>`
+ <div class="history-row">
+ <span><b>${b.ref}</b><br><span style="color:var(--muted)">Slot ${b.id} · ${b.vehicle}</span></span>
+ <span>${b.name}<br><span style="color:var(--muted)">${b.time} · ${b.source}</span></span>
+ <span class="${b.active?'tag':'red'}">${b.active?'● Reserved':'Released'}</span>
+ </div>`).join(""):"<p style='color:var(--muted)'>No bookings yet. Book a slot to see it here.</p>";
+}
+const pageInfo={
+ dashboard:["Parking Overview","Monitor the parking lot and find your ideal space."],
+ booking:["Book a Parking Slot","Reserve a free parking space."],
+ reservations:["Reservation History","Review bookings created during this demo session."],
+ analytics:["Analytics & Insights","Review current occupancy and agent activity."],
+ agent:["AI Decision Centre","Inspect the agent's rules and reasoning."]
+};
+function go(page){
+ document.querySelectorAll("[id$='Page']").forEach(el=>el.classList.add("hidden"));
+ byId(page+"Page").classList.remove("hidden");
+ document.querySelectorAll(".nav").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ byId("pageHeading").textContent=pageInfo[page][0];
+ byId("pageSub").textContent=pageInfo[page][1];
+ if(page==="booking")render();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+document.querySelectorAll(".nav").forEach(b=>b.addEventListener("click",()=>go(b.dataset.page)));
+function resetDemo(){
+ if(!confirm("Reset all parking slots and clear this demo's booking history?"))return;
+ slots=initialSlots.map(s=>({...s}));
+ bookings=[];selected=2;bookingCount=0;recommendationCount=0;lastRecommendation=null;
+ byId("recommendation").innerHTML="<div class='rec-top'><div class='rec-number'>?</div><div><strong>Awaiting decision</strong><p>Choose your preferences above.</p></div></div>";
+ byId("decisionLog").textContent="Demo reset. Run a new recommendation to inspect the agent's reasoning.";
+ render();toast("Demo reset successfully.");
+}
+byId("clock").textContent=new Date().toLocaleString();
+render();
+</script>
+</body>
+</html>
